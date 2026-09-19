@@ -108,10 +108,10 @@ do
 end
 
 
-local repo = "https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main/"
+local repo = "https://raw.githubusercontent.com/yenkgg/LinoriaLib/main/"
 local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
-local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
-local SaveManager = loadstring(game:HttpGet(repo .. "addons/SaveManager.lua"))()
+local ThemeManager = loadstring(game:HttpGet(repo .. "ThemeManager.lua"))()
+local SaveManager = loadstring(game:HttpGet(repo .. "SaveManager.lua"))()
 
 local Options = Library.Options
 local Toggles = Library.Toggles
@@ -129,6 +129,7 @@ local Window = Library:CreateWindow({
     Resizable = true,
     MobileButtonsSide = "Left",
     ShowCustomCursor = true,
+    Size = UDim2.fromOffset(550, 500),
 })
 
 local function Notify(text, duration)
@@ -3085,8 +3086,8 @@ SaveManager:IgnoreThemeSettings()
 SaveManager:SetIgnoreIndexes({"MenuKeybind"})
 ThemeManager:SetFolder("LuaYPaid")
 SaveManager:SetFolder("LuaYPaid/configs")
-SaveManager:BuildConfigSection(Tabs.Settings)
 ThemeManager:ApplyToTab(Tabs.Settings)
+SaveManager:BuildFullConfigTab(Window)
 pcall(function() SaveManager:LoadAutoloadConfig() end)
 
 task.spawn(loadstring([=[
