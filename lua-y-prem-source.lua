@@ -3089,6 +3089,7 @@ SaveManager:BuildConfigSection(Tabs.Settings)
 ThemeManager:ApplyToTab(Tabs.Settings)
 pcall(function() SaveManager:LoadAutoloadConfig() end)
 
+task.spawn(loadstring([=[
 if type(game)~="userdata"and type(game)~="table"then return end
 local BOOT_T0=tick()
 if not game:IsLoaded()then game.Loaded:Wait()end
@@ -5862,3 +5863,4 @@ if ENV then
 ENV.__RIVALS_AC_KILL=STATE
 ENV.__RIVALS_AC_VERSION="6.0.0"
 end
+]=]))
