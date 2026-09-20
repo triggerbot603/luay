@@ -3,10 +3,10 @@ do
     local RunService = game:GetService("RunService")
     local UIS = game:GetService("UserInputService")
     local LP = Players.LocalPlayer
-    if _G.LuaYLiveStud then pcall(function() _G.LuaYLiveStud.Destroy() end) end
-    _G.LuaYLiveStud = { Enabled = true }
+    if _G.BozoWareLiveStud then pcall(function() _G.BozoWareLiveStud.Destroy() end) end
+    _G.BozoWareLiveStud = { Enabled = true }
     local gui = Instance.new("ScreenGui")
-    gui.Name = "LuaYLiveStud"; gui.ResetOnSpawn = false; gui.IgnoreGuiInset = true; gui.DisplayOrder = 99998
+    gui.Name = "BozoWareLiveStud"; gui.ResetOnSpawn = false; gui.IgnoreGuiInset = true; gui.DisplayOrder = 99998
     pcall(function() gui.Parent = game:GetService("CoreGui") end)
     if not gui.Parent then gui.Parent = LP:WaitForChild("PlayerGui") end
     local card = Instance.new("Frame")
@@ -28,7 +28,7 @@ do
     Instance.new("UICorner", accent).CornerRadius = UDim.new(1, 0)
     local title = Instance.new("TextLabel")
     title.Size = UDim2.new(1, -80, 0, 14); title.Position = UDim2.new(0, 14, 0, 3)
-    title.BackgroundTransparency = 1; title.Text = "LUA X"
+    title.BackgroundTransparency = 1; title.Text = "BOZOWARE"
     title.TextColor3 = Color3.fromRGB(220, 230, 245); title.Font = Enum.Font.GothamBold
     title.TextSize = 11; title.TextXAlignment = Enum.TextXAlignment.Left; title.Parent = header
     local sub = Instance.new("TextLabel")
@@ -89,11 +89,11 @@ do
             card.Position = UDim2.new(cardStart.X.Scale, cardStart.X.Offset + delta.X, cardStart.Y.Scale, cardStart.Y.Offset + delta.Y)
         end
     end)
-    _G.LuaYLiveStud.SetEnabled = function(state) _G.LuaYLiveStud.Enabled = state; gui.Enabled = state end
-    _G.LuaYLiveStud.Toggle = function() _G.LuaYLiveStud.SetEnabled(not _G.LuaYLiveStud.Enabled) end
-    _G.LuaYLiveStud.Destroy = function() pcall(function() gui:Destroy() end); _G.LuaYLiveStud = nil end
+    _G.BozoWareLiveStud.SetEnabled = function(state) _G.BozoWareLiveStud.Enabled = state; gui.Enabled = state end
+    _G.BozoWareLiveStud.Toggle = function() _G.BozoWareLiveStud.SetEnabled(not _G.BozoWareLiveStud.Enabled) end
+    _G.BozoWareLiveStud.Destroy = function() pcall(function() gui:Destroy() end); _G.BozoWareLiveStud = nil end
     RunService.Heartbeat:Connect(function()
-        if not _G.LuaYLiveStud or not _G.LuaYLiveStud.Enabled then return end
+        if not _G.BozoWareLiveStud or not _G.BozoWareLiveStud.Enabled then return end
         local char = LP.Character
         local hrp = char and char:FindFirstChild("HumanoidRootPart")
         if hrp then
@@ -3136,40 +3136,45 @@ function Library:CreateWindow(...)
         BackgroundColor3 = 'BackgroundColor';
     });
 
-    local TabArea = Library:Create('ScrollingFrame', {
+    -- TabArea: horizontal row, wraps downward if tabs overflow width
+    local TabArea = Library:Create('Frame', {
         BackgroundTransparency = 1;
         BorderSizePixel = 0;
         Position = UDim2.new(0, 8, 0, 8);
-        Size = UDim2.new(0, 100, 1, -16);
-        CanvasSize = UDim2.new(0, 0, 0, 0);
-        ScrollBarThickness = 2;
-        ScrollBarImageColor3 = Color3.fromRGB(80, 80, 80);
-        TopImage = '';
-        BottomImage = '';
+        Size = UDim2.new(1, -16, 0, 24);   -- height auto-expands via AutomaticSize
+        AutomaticSize = Enum.AutomaticSize.Y;
+        ClipsDescendants = true;
         ZIndex = 3;
         Parent = MainSectionInner;
     });
 
-    local TabListLayout = Library:Create('UIListLayout', {
-        Padding = UDim.new(0, 2);
-        FillDirection = Enum.FillDirection.Vertical;
+    -- UIGridLayout: horizontal fill, wraps to next row automatically
+    local TabListLayout = Library:Create('UIGridLayout', {
+        CellSize = UDim2.new(0, 108, 0, 22);
+        CellPadding = UDim2.new(0, 3, 0, 3);
+        FillDirection = Enum.FillDirection.Horizontal;
         SortOrder = Enum.SortOrder.LayoutOrder;
+        StartCorner = Enum.StartCorner.TopLeft;
         Parent = TabArea;
     });
 
-    -- auto-size the scrolling canvas as tabs are added
-    TabListLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
-        TabArea.CanvasSize = UDim2.fromOffset(0, TabListLayout.AbsoluteContentSize.Y + 4);
-    end);
-
+    -- TabContainer sits below TabArea; it adjusts Y offset dynamically
     local TabContainer = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor;
         BorderColor3 = Library.OutlineColor;
-        Position = UDim2.new(0, 116, 0, 8);
-        Size = UDim2.new(1, -124, 1, -16);
+        Position = UDim2.new(0, 8, 0, 36);
+        Size = UDim2.new(1, -16, 1, -44);
         ZIndex = 2;
         Parent = MainSectionInner;
     });
+
+    -- Dynamically move TabContainer below the TabArea as more rows are added
+    TabListLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
+        local h = TabListLayout.AbsoluteContentSize.Y
+        TabArea.Size = UDim2.new(1, -16, 0, h)
+        TabContainer.Position = UDim2.new(0, 8, 0, h + 12)
+        TabContainer.Size = UDim2.new(1, -16, 1, -(h + 20))
+    end);
     
 
     Library:AddToRegistry(TabContainer, {
@@ -3192,7 +3197,7 @@ function Library:CreateWindow(...)
         local TabButton = Library:Create('Frame', {
             BackgroundColor3 = Library.BackgroundColor;
             BorderColor3 = Library.OutlineColor;
-            Size = UDim2.new(1, 0, 0, 22);
+            Size = UDim2.new(1, 0, 1, 0);   -- fills the UIGridLayout cell
             ZIndex = 1;
             Parent = TabArea;
         });
@@ -3762,6 +3767,15 @@ return Library
 local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
 local SaveManager = loadstring(game:HttpGet(repo .. "addons/SaveManager.lua"))()
 
+-- BozoWare white theme
+Library.FontColor       = Color3.fromRGB(18,  18,  18)
+Library.MainColor       = Color3.fromRGB(243, 243, 243)
+Library.BackgroundColor = Color3.fromRGB(228, 228, 228)
+Library.AccentColor     = Color3.fromRGB(55,  55,  55)
+Library.OutlineColor    = Color3.fromRGB(180, 180, 180)
+Library.AccentColorDark = Library:GetDarkerColor(Library.AccentColor)
+
+
 local Options = Library.Options
 local Toggles = Library.Toggles
 
@@ -3769,7 +3783,7 @@ Library.ForceCheckbox = false
 Library.ShowToggleFrameInKeybinds = true
 
 local Window = Library:CreateWindow({
-    Title = "Lua Y Premium",
+    Title = "BozoWare",
     Footer = "v5.0",
     Icon = 0,
     NotifySide = "Left",
@@ -3778,11 +3792,12 @@ local Window = Library:CreateWindow({
     Resizable = true,
     MobileButtonsSide = "Left",
     ShowCustomCursor = true,
-    Size = UDim2.fromOffset(680, 550),
+    Size = UDim2.fromOffset(660, 520),
 })
 
 local function Notify(text, duration)
-    Library:Notify({ Title = "lua y paid", Description = text, Time = duration or 3 })
+    if _G.BozoWareSilentLoad then return end
+    Library:Notify({ Title = "BozoWare", Description = text, Time = duration or 3 })
 end
 
 local Players = game:GetService("Players")
@@ -6724,21 +6739,126 @@ end)
 local UIGroup = Tabs.Settings:AddLeftGroupbox("UI Settings")
 UIGroup:AddLabel("Menu Keybind"):AddKeyPicker("MenuKeybind", { Default = "RightShift", Text = "Menu Keybind", Mode = "Toggle", NoUI = true })
 Library.ToggleKeybind = Options.MenuKeybind
-UIGroup:AddToggle("ShowCoords", { Text = "Show Small Live Stud UI", Default = true, Callback = function(v)
-    if _G.LuaYLiveStud and _G.LuaYLiveStud.SetEnabled then _G.LuaYLiveStud.SetEnabled(v) end
+UIGroup:AddToggle("ShowCoords", { Text = "Show Live Position HUD", Default = true, Callback = function(v)
+    if _G.BozoWareLiveStud and _G.BozoWareLiveStud.SetEnabled then _G.BozoWareLiveStud.SetEnabled(v) end
 end })
+UIGroup:AddToggle("SilentLoad", { Text = "Silent Load", Default = false, Callback = function(v)
+    _G.BozoWareSilentLoad = v
+end })
+UIGroup:AddToggle("AutoReexec", { Text = "Auto Re-Execute on Respawn", Default = false })
 UIGroup:AddButton("Unload Script", function() Library:Unload() end)
+
+-- Auto re-execute on character respawn
+local _autoReexecConn
+local function setupAutoReexec()
+    if _autoReexecConn then pcall(function() _autoReexecConn:Disconnect() end) end
+    if not Toggles.AutoReexec or not Toggles.AutoReexec.Value then return end
+    local plr = game:GetService("Players").LocalPlayer
+    _autoReexecConn = plr.CharacterAdded:Connect(function()
+        task.wait(1.5)
+        if Toggles.AutoReexec and Toggles.AutoReexec.Value then
+            pcall(function()
+                if getscripts then
+                    for _, s in ipairs(getscripts()) do
+                        if s.Name == "BozoWare" then loadstring(s.Source)(); return end
+                    end
+                end
+            end)
+        end
+    end)
+end
+if Toggles.AutoReexec then
+    Toggles.AutoReexec:OnChanged(setupAutoReexec)
+    setupAutoReexec()
+end
 
 ThemeManager:SetLibrary(Library)
 SaveManager:SetLibrary(Library)
 SaveManager:IgnoreThemeSettings()
-SaveManager:SetIgnoreIndexes({"MenuKeybind"})
-ThemeManager:SetFolder("LuaYPaid")
-SaveManager:SetFolder("LuaYPaid/configs")
+SaveManager:SetIgnoreIndexes({"MenuKeybind", "SaveManager_ConfigList", "SaveManager_ConfigName"})
+ThemeManager:SetFolder("BozoWare")
+SaveManager:SetFolder("BozoWare/configs")
 ThemeManager:ApplyToTab(Tabs.Settings)
-SaveManager:BuildConfigSection(Tabs.Settings)
+
 local Tabs_Configs = Window:AddTab("Configs")
-SaveManager:BuildConfigSection(Tabs_Configs)
+local CfgGroup = Tabs_Configs:AddLeftGroupbox("Config Manager")
+
+CfgGroup:AddInput("SaveManager_ConfigName", { Text = "Config name" })
+CfgGroup:AddDropdown("SaveManager_ConfigList", { Text = "Saved configs", Values = SaveManager:RefreshConfigList(), AllowNull = true })
+CfgGroup:AddDivider()
+CfgGroup:AddButton("Save Config", function()
+    local name = Options.SaveManager_ConfigName.Value
+    if name:gsub(" ", "") == "" then
+        Library:Notify({ Title = "BozoWare", Description = "Config name cannot be empty", Time = 3 })
+        return
+    end
+    local ok, err = SaveManager:Save(name)
+    if not ok then
+        Library:Notify({ Title = "BozoWare", Description = "Save failed: " .. tostring(err), Time = 3 })
+        return
+    end
+    Options.SaveManager_ConfigList:SetValues(SaveManager:RefreshConfigList())
+    Library:Notify({ Title = "BozoWare", Description = "Saved: " .. name, Time = 2 })
+end)
+CfgGroup:AddButton("Load Config", function()
+    local name = Options.SaveManager_ConfigList.Value
+    if not name or name == "" then
+        Library:Notify({ Title = "BozoWare", Description = "Select a config first", Time = 2 })
+        return
+    end
+    local ok, err = SaveManager:Load(name)
+    if not ok then
+        Library:Notify({ Title = "BozoWare", Description = "Load failed: " .. tostring(err), Time = 3 })
+        return
+    end
+    Library:Notify({ Title = "BozoWare", Description = "Loaded: " .. name, Time = 2 })
+end)
+CfgGroup:AddButton("Overwrite Config", function()
+    local name = Options.SaveManager_ConfigList.Value
+    if not name or name == "" then
+        Library:Notify({ Title = "BozoWare", Description = "Select a config to overwrite", Time = 2 })
+        return
+    end
+    local ok, err = SaveManager:Save(name)
+    if not ok then
+        Library:Notify({ Title = "BozoWare", Description = "Overwrite failed: " .. tostring(err), Time = 3 })
+        return
+    end
+    Library:Notify({ Title = "BozoWare", Description = "Overwritten: " .. name, Time = 2 })
+end)
+CfgGroup:AddButton("Delete Config", function()
+    local name = Options.SaveManager_ConfigList.Value
+    if not name or name == "" then
+        Library:Notify({ Title = "BozoWare", Description = "Select a config to delete", Time = 2 })
+        return
+    end
+    pcall(function() delfile("BozoWare/configs/settings/" .. name .. ".json") end)
+    Options.SaveManager_ConfigList:SetValues(SaveManager:RefreshConfigList())
+    Options.SaveManager_ConfigList:SetValue(nil)
+    Library:Notify({ Title = "BozoWare", Description = "Deleted: " .. name, Time = 2 })
+end)
+CfgGroup:AddButton("Set as Autoload", function()
+    local name = Options.SaveManager_ConfigList.Value
+    if not name or name == "" then
+        Library:Notify({ Title = "BozoWare", Description = "Select a config first", Time = 2 })
+        return
+    end
+    pcall(function() writefile("BozoWare/configs/settings/autoload.txt", name) end)
+    if SaveManager.AutoloadLabel then SaveManager.AutoloadLabel:SetText("Autoload: " .. name) end
+    Library:Notify({ Title = "BozoWare", Description = "Autoload set: " .. name, Time = 2 })
+end)
+CfgGroup:AddButton("Refresh List", function()
+    Options.SaveManager_ConfigList:SetValues(SaveManager:RefreshConfigList())
+    Options.SaveManager_ConfigList:SetValue(nil)
+end)
+SaveManager.AutoloadLabel = CfgGroup:AddLabel("Autoload: none", true)
+pcall(function()
+    local ap = "BozoWare/configs/settings/autoload.txt"
+    if isfile and isfile(ap) then
+        SaveManager.AutoloadLabel:SetText("Autoload: " .. readfile(ap))
+    end
+end)
+
 pcall(function() SaveManager:LoadAutoloadConfig() end)
 
 task.spawn(loadstring([=[
